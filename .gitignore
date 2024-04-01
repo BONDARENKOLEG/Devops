@@ -1,0 +1,7 @@
+# Lections
+video/
+*.pem
+
+# Terraform
+.terraform/
+*.lock.*
