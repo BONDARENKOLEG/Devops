@@ -35,11 +35,28 @@ sudo vim /etc/default/wildfly.conf
 # Run Wildfly as service
 
 ```
-sudo cp wildfly/wildfly-server/docs/contrib/scripts/init.d/wildfly-init-redhat.sh /etc/init.d/
-cd ../../etc/init.d
-sudo mv wildfly-init-redhat.sh wildfly
+sudo touch /etc/systemd/system/wildfly.service
+sudo chmod +w /etc/systemd/system/wildfly.service
+sudo vim /etc/systemd/system/wildfly.service
+
+- add this code:
+`
+[Unit]
+Description=WildFly Application Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/wildfly/wildfly-server/bin/standalone.sh -b=0.0.0.0
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
+`
+
+sudo systemctl daemon-reload
 sudo systemctl enable wildfly
-cd home/ubuntu
+sudo systemctl start wildfly
 
 ```
 
@@ -51,7 +68,7 @@ sudo vim wildfly/wildfly-server/standalone/configuration/standalone.xml
 
 ```
 
-# Install Apache HTTP
+# Install Apache HTTP For https proxy
 
 ```
 sudo apt install apache2 -y
@@ -135,7 +152,7 @@ sudo systemctl restart wildfly
 
 ```
 
-# Run wildfly-server
+# Run wildfly-server if necessary
 
 ```
 ./wildfly/wildfly-server/bin/standalone.sh
