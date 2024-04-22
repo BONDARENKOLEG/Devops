@@ -1,0 +1,145 @@
+---
+- hosts: wildfly
+  become: yes
+  tasks:
+    - name: 1. Updating packages
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: 2. Installing JAVA
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: 3. Downloading WildFly
+      ansible.builtin.get_url:
+        url: https://github.com/wildfly/wildfly/releases/download/31.0.1.Final/wildfly-31.0.1.Final.tar.gz
+        dest: /tmp/wildfly-31.0.1.Final.tar.gz
+
+    - name: 4. Checking if Wildfly folder exists
+      ansible.builtin.stat:
+        path: /wildfly
+      register: wildfly_dir
+
+    - name: 5. Creating Wildfly folder
+      ansible.builtin.file:
+        path: /wildfly
+        state: directory
+      when: wildfly_dir.stat.exists == false
+
+    - name: 6. Extracting WildFly
+      ansible.builtin.unarchive:
+        src: /tmp/wildfly-31.0.1.Final.tar.gz
+        dest: /wildfly
+        remote_src: yes
+        creates: /wildfly/wildfly-31.0.1.Final
+
+    - name: 7. Removing WildFly archive
+      ansible.builtin.file:
+        path: /tmp/wildfly-31.0.1.Final.tar.gz
+        state: absent
+
+    - name: 8. Copying config file
+      ansible.builtin.copy:
+        src: /wildfly/wildfly-31.0.1.Final/docs/contrib/scripts/init.d/wildfly.conf
+        dest: /etc/default/wildfly.conf
+        remote_src: yes
+
+    - name: 9.1 Configuring Wildfly
+      ansible.builtin.lineinfile:
+        path: /etc/default/wildfly.conf
+        regexp: '^# JBOSS_HOME="/opt/wildfly"'
+        line: 'JBOSS_HOME="/opt/wildfly"'
+        backrefs: yes
+
+    - name: 9.2 Configuring Wildfly
+      ansible.builtin.lineinfile:
+        path: /etc/default/wildfly.conf
+        regexp: '^# JBOSS_USER=wildfly'
+        line: 'JBOSS_USER=ubuntu'
+        backrefs: yes
+
+    - name: 9.3 Configuring Wildfly
+      ansible.builtin.lineinfile:
+        path: /etc/default/wildfly.conf
+        regexp: '^# JBOSS_MODE=standalone'
+        line: 'JBOSS_MODE=standalone'
+        backrefs: yes
+
+    - name: 9.4 Configuring Wildfly
+      ansible.builtin.lineinfile:
+        path: /etc/default/wildfly.conf
+        regexp: '^# JBOSS_CONFIG=standalone.xml'
+        line: 'JBOSS_CONFIG=standalone.xml'
+        backrefs: yes
+
+    - name: 9.5 Configuring Wildfly
+      ansible.builtin.lineinfile:
+        path: /etc/default/wildfly.conf
+        regexp: '^# STARTUP_WAIT=60'
+        line: 'STARTUP_WAIT=60'
+        backrefs: yes
+
+    - name: 10.1 Run Wildfly as service
+      ansible.builtin.file:
+        path: /etc/systemd/system/wildfly.service
+        state: touch
+        owner: ubuntu
+        group: ubuntu
+        mode: '0666'
+
+    - name: 10.2 Run Wildfly as service
+      ansible.builtin.blockinfile:
+        path: /etc/systemd/system/wildfly.service
+        block: |
+          [Unit]
+          Description=WildFly Application Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/home/wildfly/wildfly-server/bin/standalone.sh -b=0.0.0.0
+          TimeoutStartSec=300
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: 10.3 Run Wildfly as service
+      ansible.builtin.service:
+        name: wildfly
+        state: reloaded
+
+    - name: 10.4 Run Wildfly as service
+      ansible.builtin.service:
+        name: wildfly
+        enabled: yes
+
+    - name: 10.5 Run Wildfly as service
+      ansible.builtin.service:
+        name: wildfly
+        state: started
+
+    - name: 11.1 Enabling incoming requests
+      ansible.builtin.lineinfile:
+        path: /wildfly/wildfly-31.0.1.Final/standalone/configuration/standalone.xml
+        regexp: '<wsdl-host>\$\{jboss\.bind\.address:127\.0\.0\.1\}</wsdl-host>'
+        line: '<wsdl-host>${jboss.bind.address:0.0.0.0}</wsdl-host>'
+        backrefs: yes
+
+    - name: 11.2 Enabling incoming requests
+      ansible.builtin.lineinfile:
+        path: /wildfly/wildfly-31.0.1.Final/standalone/configuration/standalone.xml
+        regexp: '<inet-address value="\$\{jboss\.bind\.address\.management:127\.0\.0\.1\}"/>'
+        line: '<inet-address value="${jboss.bind.address.management:0.0.0.0}"/>'
+        backrefs: yes
+
+    - name: 11.3 Enabling incoming requests
+      ansible.builtin.lineinfile:
+        path: /wildfly/wildfly-31.0.1.Final/standalone/configuration/standalone.xml
+        regexp: '<inet-address value="\$\{jboss\.bind\.address:127\.0\.0\.1\}"/>'
+        line: '<inet-address value="${jboss.bind.address:0.0.0.0}"/>'
+        backrefs: yes
+
+    - name: 12. Run Wildfly
+      ansible.builtin.shell:
+        cmd: /wildfly/wildfly-31.0.1.Final/bin/standalone.sh
