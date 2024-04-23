@@ -64,7 +64,6 @@ sudo systemctl start wildfly
 
 ```
 sudo vim wildfly/wildfly-server/standalone/configuration/standalone.xml
-./wildfly/wildfly-server/bin/standalone.sh
 
 ```
 

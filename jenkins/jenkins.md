@@ -16,33 +16,6 @@ sudo apt install default-jre
 sudo apt install apache2 -y
 ```
 
-# Add key for Jenkins package
-
-```
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
-/usr/share/keyrings/jenkins-keyring.asc > /dev/null
-```
-
-# Add repository for installation
-
-```
-echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-/etc/apt/sources.list.d/jenkins.list > /dev/null
-```
-
-# Update the package index
-
-```
-sudo apt-get update
-```
-
-# Install jenkins
-
-```
-sudo apt-get install jenkins
-```
-
 # Setup ssl
 
 ```
@@ -55,7 +28,7 @@ sudo mkdir /etc/apache2/ssl
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
 ```
 
-# Setup Apache
+# Config Apache
 
 ```
 sudo bash -c 'cat > /etc/apache2/sites-available/000-default.conf << EOF
@@ -77,7 +50,7 @@ sudo bash -c 'cat > /etc/apache2/sites-available/000-default.conf << EOF
 EOF'
 ```
 
-# Setup proxy
+# Config proxy
 
 ```
 sudo bash -c 'cat > /etc/apache2/mods-available/proxy.conf << EOF
@@ -105,7 +78,34 @@ sudo a2enmod rewrite
 sudo a2enmod headers
 ```
 
-# Change HTTP_HOST
+# Add key for Jenkins package
+
+```
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
+/usr/share/keyrings/jenkins-keyring.asc > /dev/null
+```
+
+# Add repository for installation
+
+```
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+/etc/apt/sources.list.d/jenkins.list > /dev/null
+```
+
+# Update the package index
+
+```
+sudo apt-get update
+```
+
+# Install jenkins
+
+```
+sudo apt-get install jenkins
+```
+
+# Change HTTP_HOST in Jenkins
 
 ```
 sudo vim /etc/default/jenkins
