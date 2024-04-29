@@ -1,0 +1,5 @@
+---
+- import_playbook: ./01_setup_jenkins_apache.yml
+- import_playbook: ./02_setup_jenkins.yml
+####
+

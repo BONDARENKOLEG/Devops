@@ -1,7 +1,7 @@
 ---
 - import_playbook: ./jenkins/01_setup_jenkins_apache.yml
 - import_playbook: ./jenkins/02_setup_jenkins.yml
-- import_playbook: ./wildfly/01_setup_wildfly_apache.yml
-- import_playbook: ./wildfly/02_setup_wildfly.yml
+# - import_playbook: ./wildfly/01_setup_wildfly_apache.yml
+# - import_playbook: ./wildfly/02_setup_wildfly.yml
 ####
 
