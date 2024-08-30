@@ -26,7 +26,7 @@ import_playbook: 01_setup_jenkins_apache.yaml
 ...
 ```
 
-# 4-Create palybooks
+# 4-Create playbooks
 
 ...
 
